@@ -1,0 +1,41 @@
+# Primary run path (ADR-002, ADR-003, ADR-020): `docker compose up --build` gives a running API
+# on Postgres with demo jobs (and their PDFs) already seeded. SQLite remains the zero-setup
+# default for local `uvicorn`/`pytest` runs outside Docker.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: certgen
+      POSTGRES_PASSWORD: certgen
+      POSTGRES_DB: certgen
+    volumes:
+      - certgen_pgdata:/var/lib/postgresql/data
+    # Published on 5433 (not 5432) so a host Postgres install, if any, never clashes, and so a
+    # local (non-Docker) uvicorn can point DATABASE_URL at this same container.
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "certgen", "-d", "certgen"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://certgen:certgen@db:5432/certgen
+      STORAGE_DIR: /app/data/storage
+      DISPATCHER: thread
+    # Single process: migrate, seed demo jobs (no-op if the DB already has jobs), then serve.
+    command: sh -c "alembic upgrade head && python scripts/seed.py && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - certgen_data:/app/data
+
+volumes:
+  certgen_pgdata:
+  certgen_data:

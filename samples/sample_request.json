@@ -1,0 +1,17 @@
+{
+  "certificate": {
+    "title": "Certificate of Completion",
+    "program_name": "Advanced Python Bootcamp",
+    "issuer_name": "Acme Academy",
+    "issue_date": "2026-10-01",
+    "signatory_name": "Jane Doe",
+    "signatory_title": "Program Director"
+  },
+  "recipients": [
+    { "name": "Asha Verma", "email": "asha@example.com" },
+    { "name": "Rahul Mehta", "email": "rahul@example.com" },
+    { "name": "Emily Clarke", "email": "emily.clarke@example.com" },
+    { "name": "Daniel Osei", "email": "daniel.osei@example.com" },
+    { "name": "Priya Nair", "email": "priya.nair@example.com" }
+  ]
+}
